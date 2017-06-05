@@ -53,6 +53,7 @@ class Divider constructor(@param:Type val type: Long,
         private var size: Int? = null
         private var marginSize: Int? = null
         private var hideLastDivider: Boolean = false
+        private var showTopDivider: Boolean = false
 
         private var visibleFactory: VisibleFactory? = null
         private var drawableFactory: DrawableFactory? = null
@@ -106,6 +107,11 @@ class Divider constructor(@param:Type val type: Long,
             return this
         }
 
+        fun showTopDivider(): Builder {
+            this.showTopDivider = true
+            return this
+        }
+
         fun visibleFactory(visibleFactory: VisibleFactory?): Builder {
             this.visibleFactory = visibleFactory
             return this
@@ -135,6 +141,8 @@ class Divider constructor(@param:Type val type: Long,
             if (visibleFactory == null) {
                 if (hideLastDivider) {
                     visibleFactory = VisibleFactory.getLastItemInvisibleFactory()
+                } else if (showTopDivider) {
+                    visibleFactory = VisibleFactory.getTopItemVisibleFactory()
                 } else {
                     visibleFactory = VisibleFactory.getDefault()
                 }
@@ -150,7 +158,7 @@ class Divider constructor(@param:Type val type: Long,
 
             if (drawableFactory == null) {
                 var currentDrawable: Drawable? = null
-                when(this.type) {
+                when (this.type) {
                     TYPE_COLOR -> {
                         if (this.color != null) {
                             currentDrawable = color!!.colorToDrawable()
@@ -212,7 +220,7 @@ class Divider constructor(@param:Type val type: Long,
         val orientation = parent.getOrientation()
         val spanCount = parent.getSpanCount()
         val childCount = parent.childCount
-        for (i in 0..childCount-1) {
+        for (i in 0..childCount - 1) {
             val child = parent.getChildAt(i)
             val itemPosition = parent.getChildAdapterPosition(child)
             val groupIndex = parent.getGroupIndex(itemPosition)
@@ -302,13 +310,18 @@ class Divider constructor(@param:Type val type: Long,
                         }
                     }
                 }
-
                 top = childBottom + params.bottomMargin
                 bottom = top + size
                 left = childLeft + margin - marginToAddBefore
                 right = childRight - margin + marginToAddAfter
 
                 setBoundsAndDraw(divider, c, left, top, right, bottom)
+
+                if (childCount > 0 && showDivider == VisibleFactory.SHOW_TOP) {
+                    bottom = childTop + params.topMargin
+                    top = bottom - size
+                    setBoundsAndDraw(divider, c, left, top, right, bottom)
+                }
             } else {
                 if (spanCount > 1 && spanSize < spanCount) {
                     left = childLeft + margin
@@ -362,6 +375,13 @@ class Divider constructor(@param:Type val type: Long,
                 right = left + size
 
                 setBoundsAndDraw(divider, c, left, top, right, bottom)
+
+                if (childCount > 0 && showDivider == VisibleFactory.SHOW_TOP) {
+                    right = childLeft + params.leftMargin
+                    left = right - size
+
+                    setBoundsAndDraw(divider, c, left, top, right, bottom)
+                }
             }
         }
     }
@@ -402,7 +422,11 @@ class Divider constructor(@param:Type val type: Long,
 
         if (orientation == RecyclerView.VERTICAL) {
             if (spanCount == 1 || spanSize == spanCount) {
-                outRect.set(0, 0, 0, size)
+                if (itemPosition == 0 && showDivider == VisibleFactory.SHOW_TOP) {
+                    outRect.set(0, size, 0, size)
+                } else {
+                    outRect.set(0, 0, 0, size)
+                }
             } else if (lineAccumulatedSpan == spanSize) {
                 outRect.set(0, 0, halfSize, size)
             } else if (lineAccumulatedSpan == spanCount) {
@@ -412,7 +436,11 @@ class Divider constructor(@param:Type val type: Long,
             }
         } else {
             if (spanCount == 1 || spanSize == spanCount) {
-                outRect.set(0, 0, size, 0)
+                if (itemPosition == 0 && showDivider == VisibleFactory.SHOW_TOP) {
+                    outRect.set(size, 0, size, 0)
+                } else {
+                    outRect.set(0, 0, size, 0)
+                }
             } else if (lineAccumulatedSpan == spanSize) {
                 outRect.set(0, 0, size, halfSize)
             } else if (lineAccumulatedSpan == spanCount) {

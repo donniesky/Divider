@@ -24,12 +24,17 @@ abstract class VisibleFactory {
             return LastItemInvisible()
         }
 
+        fun getTopItemVisibleFactory(): VisibleFactory {
+            return TopItemVisible()
+        }
+
         const val SHOW_NONE = 0L
         const val SHOW_ITEMS_ONLY = 1L
         const val SHOW_GROUP_ONLY = 2L
         const val SHOW_ALL = 3L
+        const val SHOW_TOP = 4L
 
-        @IntDef(SHOW_NONE, SHOW_ITEMS_ONLY, SHOW_GROUP_ONLY, SHOW_ALL)
+        @IntDef(SHOW_NONE, SHOW_ITEMS_ONLY, SHOW_GROUP_ONLY, SHOW_ALL, SHOW_TOP)
         @Retention(AnnotationRetention.SOURCE)
         annotation class Show
 
@@ -46,6 +51,12 @@ abstract class VisibleFactory {
 
             override fun displayDividerForItem(groupCount: Int, groupIndex: Int): Long {
                 return if (groupIndex == groupCount - 1) SHOW_ITEMS_ONLY else SHOW_ALL
+            }
+        }
+
+        class TopItemVisible : VisibleFactory() {
+            override fun displayDividerForItem(groupCount: Int, groupIndex: Int): Long {
+                return if (groupIndex == 0) SHOW_TOP else SHOW_ALL
             }
         }
     }
