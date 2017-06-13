@@ -3,7 +3,8 @@
 ## Setup and usage
 ### installation
 
-with gradle
+#### with gradle
+
 Step 1. Add the JitPack repository to your build file
 
 Add it in your root build.gradle at the end of repositories:
@@ -16,6 +17,7 @@ Add it in your root build.gradle at the end of repositories:
 	}
 ```
 Step 2. Add the dependency
+
 Assuming you have installed jitpack provider:
 ```GRADLE
 	dependencies {
